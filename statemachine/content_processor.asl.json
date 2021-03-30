@@ -1,21 +1,19 @@
 {
-    "Comment": "A state machine for processing feed data.",
-    "StartAt": "Superfeedr Webhook",
-    "States": {
-        "Superfeedr Webhook": {
-            "Type": "Task",
-            "Resource": "${WebhookFunctionArn}",
-            "Retry": [
-                {
-                    "ErrorEquals": [
-                        "States.TaskFailed"
-                    ],
-                    "IntervalSeconds": 15,
-                    "MaxAttempts": 5,
-                    "BackoffRate": 1.5
-                }
-            ],
-            "End": true
-        }
+  "Comment": "A state machine for processing feed data.",
+  "StartAt": "Superfeedr Webhook",
+  "States": {
+    "Superfeedr Webhook": {
+      "Type": "Task",
+      "Resource": "${WebhookFunctionArn}",
+      "Retry": [{
+        "ErrorEquals": [
+          "States.TaskFailed"
+        ],
+        "IntervalSeconds": 15,
+        "MaxAttempts": 5,
+        "BackoffRate": 1.5
+      }],
+      "End": true
     }
+  }
 }

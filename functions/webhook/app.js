@@ -4,13 +4,13 @@
  * 
  */
 exports.webhook = async (event, context) => {
-    console.log(event.body);
-    response = {
-        'statusCode': 200,
-        'body': JSON.stringify({
-            message: 'hello world'
-        })
-    }
+  console.log(event.body);
+  response = {
+    'statusCode': 200,
+    'body': JSON.stringify({
+      message: 'hello world'
+    })
+  }
 
-    return response;
+  return response;
 };
