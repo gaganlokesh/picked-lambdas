@@ -1,11 +1,7 @@
 {
-  "name": "stock_checker",
-  "version": "1.0.0",
-  "description": "Mock stock checker for NodeJS",
+  "name": "picked-webhook",
+  "private": true,
   "main": "app.js",
-  "repository": "TODO",
-  "author": "SAM CLI",
-  "license": "MIT",
   "dependencies": {},
   "scripts": {
     "test": "mocha tests/unit/"
