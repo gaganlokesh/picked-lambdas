@@ -5,15 +5,26 @@
     "Superfeedr Webhook": {
       "Type": "Task",
       "Resource": "${WebhookFunctionArn}",
-      "Retry": [{
-        "ErrorEquals": [
-          "States.TaskFailed"
-        ],
-        "IntervalSeconds": 15,
-        "MaxAttempts": 5,
-        "BackoffRate": 1.5
-      }],
+      "Catch": [{
+          "ErrorEquals": ["UnrecognizedRequestError"],
+          "Next": "Unrecognized Request"
+        },
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "Catch All"
+        }
+      ],
       "End": true
+    },
+    "Unrecognized Request": {
+      "Type": "Fail",
+      "Error": "UnrecognizedRequest",
+      "Cause": "The request body may not be of the correct format"
+    },
+    "Catch All": {
+      "Type": "Fail",
+      "Error": "An error of unknown type occurred",
+      "Cause": "Unknown error!"
     }
   }
 }

@@ -28,6 +28,13 @@ Resources:
       CodeUri: functions/webhook/
       Handler: app.webhook
       Runtime: nodejs14.x
+      Environment:
+        Variables:
+          WebhookSecret: !Ref WebhookSecret
+    
+Parameters:
+  WebhookSecret:
+    Type: String
 
 Outputs:
   ContentProcessorStateMachineArn:
