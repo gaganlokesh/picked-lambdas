@@ -1,0 +1,23 @@
+{
+  "name": "picked-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "main": "app.js",
+  "dependencies": {
+    "@mozilla/readability": "^0.4.1",
+    "got": "^11.8.2",
+    "jsdom": "^16.5.2",
+    "metascraper": "^5.21.4",
+    "metascraper-author": "^5.21.4",
+    "metascraper-image": "^5.21.4",
+    "metascraper-lang": "^5.21.4",
+    "reading-time": "^1.3.0"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1"
+  }
+}

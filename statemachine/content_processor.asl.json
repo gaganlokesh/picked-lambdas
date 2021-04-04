@@ -14,6 +14,30 @@
           "Next": "Catch All"
         }
       ],
+      "Next": "Scrape All"
+    },
+    "Scrape All": {
+      "Type": "Map",
+      "InputPath": "$",
+      "ItemsPath": "$.items",
+      "MaxConcurrency": 0,
+      "Iterator": {
+        "StartAt": "Scrape Metadata",
+        "States": {
+          "Scrape Metadata": {
+            "Type": "Task",
+            "Resource": "${ScraperFunctionArn}",
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$.items",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "Catch All"
+        }
+      ],
       "End": true
     },
     "Unrecognized Request": {
