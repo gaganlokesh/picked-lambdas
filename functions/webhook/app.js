@@ -16,7 +16,9 @@ const parseFeedItems = (items) => {
     feedItems = items.map((item) => ({
       id: crypto.createHash('md5').update(item.id).digest('hex'),
       title: item.title,
+      content: item.content,
       url: item.permalinkUrl,
+      language: item.language,
       publishedAt: epochToDateTime(item.published),
       updatedAt: epochToDateTime(item.updated),
       tags: item.categories ? item.categories.map(c => c.toLowerCase()) : [],
