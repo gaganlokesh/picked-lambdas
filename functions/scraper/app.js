@@ -53,6 +53,7 @@ exports.scraper = async (event, context) => {
       return {
         ...event,
         ...res,
+        tags: event.tags?.length > 0 ? event.tags : res.tags,
       }
     });
 };

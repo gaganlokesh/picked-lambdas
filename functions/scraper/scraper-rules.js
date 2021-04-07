@@ -1,5 +1,7 @@
 'use strict'
 
+const { isArray, jsonld, toRule } = require('@metascraper/helpers');
+
 const wrapElementExists = rule => ({ htmlDom, url }) => {
   const element = rule(htmlDom, url);
   if (element) {
@@ -18,6 +20,40 @@ const wrapMeteredContent = rule => ({ htmlDom, url }) => {
   return false;
 }
 
+const formatTag = tag => {
+  return tag.toLowerCase()
+    .replace('#', '')
+    .trim()
+}
+
+const tags = (values) => isArray(values) && values.map(formatTag)
+
+const toTags = toRule(tags);
+
+const wrapMediumTags = rule => ({ htmlDom, url }) => {
+  const keywords = rule(htmlDom);
+  const PREFIX = "Tag:";
+
+  if (!keywords || !isArray(keywords)) return false;
+
+  return keywords
+      .filter(keyword => keyword.includes(PREFIX))
+      .map(keyword => keyword.replace(PREFIX, ''))
+      .map(formatTag)
+}
+
+const $jsonldRaw = prop => $ => {
+  const collection = jsonld($);
+  let value;
+
+  collection.find(item => {
+    value = item[prop];
+    return !!value;
+  })
+
+  return value;
+}
+
 module.exports = () => {
   const rules = {
     authorTwitter: [
@@ -29,6 +65,12 @@ module.exports = () => {
     paid: [
       wrapMeteredContent($ => $('meta[name="article:content_tier"]').attr('content')),
       wrapElementExists($ => $('article.meteredContent').html()),
+    ],
+    tags: [
+      toTags($ => $('meta[name="keywords"]').attr('content')?.split(',')),
+      toTags($ => $('article a.tag').toArray().map(el => $(el).text())),
+      wrapMediumTags($jsonldRaw('keywords')),
+      toTags($jsonldRaw('applicationCategory')),
     ]
   }
 
