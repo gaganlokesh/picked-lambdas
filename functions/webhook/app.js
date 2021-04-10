@@ -43,7 +43,7 @@ exports.webhook = async (event, context) => {
     throw new UnrecognizedRequestError("Request body cannot be empty");
   }
 
-  const hmac = crypto.createHmac('sha1', process.env.WebhookSecret);
+  const hmac = crypto.createHmac('sha1', process.env.WEBHOOK_SECRET);
   const signature = `sha1=${hmac.update(JSON.stringify(body)).digest('hex')}`;
   if (headers['x-hub-signature'] !== signature) {
     console.warn('Failed to verify hub signature');
