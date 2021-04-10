@@ -27,6 +27,11 @@
           "Scrape Metadata": {
             "Type": "Task",
             "Resource": "${ScraperFunctionArn}",
+            "Next": "Upload to S3"
+          },
+          "Upload to S3": {
+            "Type": "Task",
+            "Resource": "${UploaderFunctionArn}",
             "End": true
           }
         }
