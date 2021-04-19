@@ -4,9 +4,7 @@
   "private": true,
   "main": "app.js",
   "dependencies": {},
-  "scripts": {
-    "test": "mocha tests/unit/"
-  },
+  "scripts": {},
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.2.1"

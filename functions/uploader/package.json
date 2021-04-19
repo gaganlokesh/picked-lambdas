@@ -9,9 +9,7 @@
     "got": "^11.8.2",
     "sharp": "^0.28.1"
   },
-  "scripts": {
-    "test": "mocha tests/unit/"
-  },
+  "scripts": {},
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.2.1"
