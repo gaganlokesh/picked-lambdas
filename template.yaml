@@ -14,6 +14,7 @@ Resources:
         WebhookFunctionArn: !GetAtt WebhookFunction.Arn
         ScraperFunctionArn: !GetAtt ScraperFunction.Arn
         UploaderFunctionArn: !GetAtt UploaderFunction.Arn
+        NotifierFunctionArn: !GetAtt NotifierFunction.Arn
       Events:
         ApiGatewayTrigger:
           Type: Api
@@ -27,6 +28,8 @@ Resources:
             FunctionName: !Ref ScraperFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref UploaderFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref NotifierFunction
 
   WebhookFunction:
     Type: AWS::Serverless::Function
@@ -62,6 +65,18 @@ Resources:
           IMAGE_PREFIX: !Ref ImagePrefix
           BUCKET_REGION: !Ref BucketRegion
 
+  NotifierFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/notifier/
+      Handler: app.notifier
+      Runtime: nodejs14.x
+      Timeout: 60
+      Environment:
+        Variables:
+          CALLBACK_URL: !Ref CallbackUrl
+          CALLBACK_SECRET: !Ref CallbackSecret
+
   UploaderBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -80,6 +95,10 @@ Parameters:
   BucketRegion:
     Type: String
     Default: "ap-south-1"
+  CallbackUrl:
+    Type: String
+  CallbackSecret:
+    Type: String
 
 Outputs:
   ContentProcessorStateMachineArn:

@@ -43,6 +43,17 @@
           "Next": "Catch All"
         }
       ],
+      "Next": "Notify Webhook"
+    },
+    "Notify Webhook": {
+      "Type": "Task",
+      "Resource": "${NotifierFunctionArn}",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "Catch All"
+        }
+      ],
       "End": true
     },
     "Unrecognized Request": {
