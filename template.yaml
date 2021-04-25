@@ -19,7 +19,7 @@ Resources:
         ApiGatewayTrigger:
           Type: Api
           Properties:
-            Path: /
+            Path: /{sourceId}
             Method: post
       Policies:
         - LambdaInvokePolicy:

@@ -36,7 +36,7 @@ const parseFeedItems = (items) => {
  * @param {Object} context - Lambda Context runtime methods and attributes
  */
 exports.webhook = async (event, context) => {
-  const { body, headers } = event;
+  const { body, headers, params } = event;
 
   if (!body || Object.keys(body).length === 0) {
     console.warn("Empty body provided in request");
@@ -57,6 +57,7 @@ exports.webhook = async (event, context) => {
   }
 
   const response = {
+    sourceId: params.sourceId,
     items: parseFeedItems(body.items || [])
   }
 
