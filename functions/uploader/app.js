@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const got = require('got');
 const sharp = require('sharp');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getPlaiceholder } = require('plaiceholder');
 
 const getImage = async (url) => {
   return got(url, { responseType: 'buffer' })
@@ -59,7 +60,7 @@ exports.uploader = async (event, context) => {
     .then(buffer => {
       const image = sharp(buffer);
       
-      return image.metadata().then(metadata => {
+      const uploadPromise = image.metadata().then(metadata => {
         const meta = {
           format: metadata.format,
           width: metadata.width,
@@ -68,11 +69,21 @@ exports.uploader = async (event, context) => {
 
         return uploadImage(buffer, meta);
       })
+
+      const placeholderPromise = getPlaiceholder(buffer)
+        .then(({ base64 }) => (base64))
+        .catch(err => {
+          console.warn(err);
+          return null;
+        })
+
+      return Promise.all([uploadPromise, placeholderPromise]);
     })
-    .then(key => {
+    .then(values => {
       return {
         ...event,
-        s3ImageKey: key,
+        s3ImageKey: values[0],
+        imagePlaceholder: values[1],
       }
     })
     .catch(err => {
