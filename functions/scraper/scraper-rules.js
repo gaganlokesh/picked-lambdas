@@ -62,7 +62,7 @@ module.exports = () => {
     canonicalUrl: [
       ({ htmlDom: $, url }) => $('link[rel="canonical"]').attr('href'),
     ],
-    paid: [
+    metered: [
       wrapMeteredContent($ => $('meta[name="article:content_tier"]').attr('content')),
       wrapElementExists($ => $('article.meteredContent').html()),
     ],

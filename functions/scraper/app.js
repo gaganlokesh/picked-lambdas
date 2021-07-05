@@ -35,7 +35,7 @@ const scrapeMetadata = async ({ url: targetUrl, content }) => {
 
   return {
     ...metadata,
-    paid: metadata.paid === 'true' ? true : false,
+    metered: metadata.metered === 'true' ? true : false,
     readTime,
   };
 }
