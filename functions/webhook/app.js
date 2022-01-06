@@ -7,29 +7,23 @@ class UnrecognizedRequestError extends Error {
   }
 }
 
-const epochToDateTime = (epoch) => epoch ? new Date(epoch * 1000) : null;
+const buildFeedItems = (items) => {
+  if (!items || items?.length === 0) return [];
 
-const parseFeedItems = (items) => {
-  let feedItems = [];
-
-  if (items.length > 0) {
-    feedItems = items.map((item) => ({
-      id: crypto.createHash('md5').update(item.id).digest('hex'),
-      title: item.title,
-      content: item.content,
-      url: item.permalinkUrl,
-      language: item.language,
-      publishedAt: epochToDateTime(item.published),
-      updatedAt: epochToDateTime(item.updated),
-      tags: item.categories ? item.categories.map(c => c.toLowerCase()) : [],
-    }))
-  }
-
-  return feedItems;
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    // content: item.content_text || item.content_html,
+    url: item.url,
+    language: item.language,
+    tags: item.tags ? item.tags.map(tag => tag.toLowerCase()) : [],
+    publishedAt: item.date_published,
+    updatedAt: item.date_modified,
+  }))
 }
 
 /**
- * Lambda function to process webhook requests from superfeedr.
+ * Lambda function to process webhook requests from feeder.
  * This function parses the request body and creates a list of feed items.
  * 
  * @param {Object} event - Input event to the Lambda function
@@ -43,8 +37,8 @@ exports.webhook = async (event, context) => {
     throw new UnrecognizedRequestError("Request body cannot be empty");
   }
 
-  const hmac = crypto.createHmac('sha1', process.env.WEBHOOK_SECRET);
-  const signature = `sha1=${hmac.update(JSON.stringify(body)).digest('hex')}`;
+  const hmac = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET);
+  const signature = `sha256=${hmac.update(JSON.stringify(body)).digest('hex')}`;
   if (headers['x-hub-signature'] !== signature) {
     console.warn('Failed to verify hub signature');
     throw new UnrecognizedRequestError("Failed to verify hub signature");
@@ -56,10 +50,8 @@ exports.webhook = async (event, context) => {
     throw new UnrecognizedRequestError("No feed items to process");
   }
 
-  const response = {
+  return {
     sourceId: params.sourceId,
-    items: parseFeedItems(body.items || [])
-  }
-
-  return response;
+    items: buildFeedItems(body.items)
+  };
 };

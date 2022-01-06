@@ -1,8 +1,8 @@
 {
   "Comment": "A state machine for processing feed data.",
-  "StartAt": "Superfeedr Webhook",
+  "StartAt": "Feeder Webhook",
   "States": {
-    "Superfeedr Webhook": {
+    "Feeder Webhook": {
       "Type": "Task",
       "Resource": "${WebhookFunctionArn}",
       "Catch": [{
