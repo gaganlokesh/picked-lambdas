@@ -3,7 +3,10 @@ const metascraper = require('metascraper')([
   require('metascraper-author')(),
   require('metascraper-image')(),
   require('metascraper-lang')(),
-  require('./scraper-rules.js')()
+  require('./rules/author-twitter.js')(),
+  require('./rules/canonical-url.js')(),
+  require('./rules/metered-content.js')(),
+  require('./rules/tags.js')(),
 ]);
 const { Readability, isProbablyReaderable } = require('@mozilla/readability');
 const { JSDOM } = require('jsdom');
@@ -30,7 +33,7 @@ const scrapeMetadata = async ({ url: targetUrl, content }) => {
   const { body: html, url } = await got(targetUrl);
   const metadata = await metascraper({ html, url });
   const readabilityMeta = getReadabilityMeta(html, url);
-  let articleContent = content || readabilityMeta.content || null;
+  let articleContent = content || readabilityMeta?.content || null;
   let readTime = articleContent ? readingTime(articleContent).minutes : null;
 
   return {
@@ -45,15 +48,14 @@ const scrapeMetadata = async ({ url: targetUrl, content }) => {
  * @param {Object} context - Lambda Context runtime methods and attributes
  *
  * @returns {Object} object - Enriched feed item
- * 
+ *
  */
 exports.scraper = async (event, context) => {
-  return scrapeMetadata(event)
-    .then((res) => {
-      return {
-        ...event,
-        ...res,
-        tags: event.tags?.length > 0 ? event.tags : res.tags,
-      }
-    });
+  const metadata = await scrapeMetadata(event);
+
+  return {
+    ...event,
+    ...metadata,
+    tags: event.tags?.length > 0 ? event.tags : (metadata.tags || []),
+  }
 };
