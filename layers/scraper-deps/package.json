@@ -1,0 +1,13 @@
+{
+  "name": "scraper-deps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lambda Layer for web scraping dependencies",
+  "scripts": {},
+  "dependencies": {
+    "browserless": "^9.3.2",
+    "chrome-aws-lambda": "^10.1.0",
+    "lodash": "^4.17.21",
+    "puppeteer-core": "^10.4.0"
+  }
+}

@@ -19,8 +19,8 @@ Resources:
         ApiGatewayTrigger:
           Type: Api
           Properties:
-            Path: /{sourceId}
             Method: post
+            Path: /{sourceId}
       Policies:
         - LambdaInvokePolicy:
             FunctionName: !Ref WebhookFunction
@@ -46,8 +46,11 @@ Resources:
     Properties:
       CodeUri: functions/scraper/
       Handler: app.scraper
+      Layers:
+        - !Ref ScraperDepsLayer
       Runtime: nodejs14.x
       Timeout: 50
+      MemorySize: 1024
 
   UploaderFunction:
     Type: AWS::Serverless::Function
@@ -77,12 +80,23 @@ Resources:
           CALLBACK_URL: !Ref CallbackUrl
           CALLBACK_SECRET: !Ref CallbackSecret
 
+  ScraperDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - nodejs14.x
+      ContentUri: layers/scraper-deps/
+      Description: Dependencies for web scraping
+      LayerName: ScraperDepsLayer
+    Metadata:
+      BuildMethod: nodejs14.x
+
   UploaderBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref ImageBucket
 
-    
+
 Parameters:
   WebhookSecret:
     Type: String
