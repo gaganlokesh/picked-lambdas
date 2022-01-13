@@ -14,7 +14,7 @@ const toHexPalette = async (palette) => {
       return acc;
     }, [])
     .sort((a, b) => a.popularity <= b.popularity)
-    .map(color => color.hex)
+    .map(color => color.hex?.toUpperCase())
   ;
 }
 

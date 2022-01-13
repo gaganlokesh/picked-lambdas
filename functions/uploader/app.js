@@ -7,9 +7,7 @@ const { generateColorPalette, getDominantColors } = require('./utils.js');
 
 const getImage = async (url) => {
   return got(url, { responseType: 'buffer' })
-    .then(res => {
-      return res.body;
-    })
+    .then(res => res.body)
     .catch(err => {
       console.warn("Error downloading image:", err);
       throw err;
@@ -17,11 +15,14 @@ const getImage = async (url) => {
   ;
 }
 
+const hashImage = (buffer) => {
+  const hash = crypto.createHash('md5');
+  hash.update(buffer, 'utf8');
+  return hash.digest('hex');
+}
+
 const uploadImage = async (buffer, metadata, keyNamePrefix="") => {
-  const keyName = crypto.createHash('md5')
-    .update(buffer, 'utf8')
-    .digest('hex');
-  const key = `${keyNamePrefix}${keyName}.${metadata.format}`
+  const key = `${keyNamePrefix}${hashImage(buffer)}.${metadata.format}`;
   let objectParams = {
     Bucket: process.env.IMAGE_BUCKET,
     Key: key,
@@ -34,13 +35,14 @@ const uploadImage = async (buffer, metadata, keyNamePrefix="") => {
   console.log(`Starting upload for ${key}`)
   return s3.send(new PutObjectCommand(objectParams))
     .then(res => {
-      console.log('Upload successful!', res);
+      console.log('Upload successful!');
       return key;
     })
     .catch(err => {
       console.warn("Failed to upload image:", err);
       throw err;
     })
+  ;
 }
 
 /**
@@ -93,7 +95,8 @@ exports.uploader = async (event, context) => {
       }
     })
     .catch(err => {
-      console.warn(err);
+      console.error(err);
       return null;
     })
+  ;
 };
