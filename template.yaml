@@ -65,7 +65,6 @@ Resources:
       Environment:
         Variables:
           IMAGE_BUCKET: !Ref ImageBucket
-          IMAGE_PREFIX: !Ref ImagePrefix
           BUCKET_REGION: !Ref BucketRegion
 
   NotifierFunction:
@@ -96,16 +95,12 @@ Resources:
     Properties:
       BucketName: !Ref ImageBucket
 
-
 Parameters:
   WebhookSecret:
     Type: String
   ImageBucket:
     Type: String
     Default: "picked-dev"
-  ImagePrefix:
-    Type: String
-    Default: "articles/main/"
   BucketRegion:
     Type: String
     Default: "ap-south-1"

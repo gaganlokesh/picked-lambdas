@@ -16,12 +16,11 @@ const getImage = async (url) => {
   ;
 }
 
-const uploadImage = async (buffer, metadata) => {
-  const keyPrefix = process.env.IMAGE_PREFIX;
+const uploadImage = async (buffer, metadata, keyNamePrefix="") => {
   const keyName = crypto.createHash('md5')
     .update(buffer, 'utf8')
     .digest('hex');
-  const key = `${keyPrefix}${keyName}.${metadata.format}`
+  const key = `${keyNamePrefix}${keyName}.${metadata.format}`
   let objectParams = {
     Bucket: process.env.IMAGE_BUCKET,
     Key: key,
@@ -48,18 +47,19 @@ const uploadImage = async (buffer, metadata) => {
  * @param {Object} context - Lambda Context runtime methods and attributes
  *
  * @returns {Object} object - Object containing feed item along with uploaded links
- * 
+ *
  */
 exports.uploader = async (event, context) => {
-  if (!event.image) {
-    console.warn("No image to upload")
-    return event;
+  const { imageUrl, keyNamePrefix } = event;
+  if (!imageUrl) {
+    console.warn("No image URL provided");
+    return null;
   }
 
-  return getImage(event.image)
+  return getImage(imageUrl)
     .then(buffer => {
       const image = sharp(buffer);
-      
+
       const uploadPromise = image.metadata().then(metadata => {
         const meta = {
           format: metadata.format,
@@ -67,7 +67,7 @@ exports.uploader = async (event, context) => {
           height: metadata.height,
         }
 
-        return uploadImage(buffer, meta);
+        return uploadImage(buffer, meta, keyNamePrefix);
       })
 
       const placeholderPromise = getPlaiceholder(buffer)
@@ -81,13 +81,12 @@ exports.uploader = async (event, context) => {
     })
     .then(values => {
       return {
-        ...event,
         s3ImageKey: values[0],
         imagePlaceholder: values[1],
       }
     })
     .catch(err => {
       console.warn(err);
-      return event;
+      return null;
     })
 };

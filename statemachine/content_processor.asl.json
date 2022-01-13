@@ -32,6 +32,11 @@
           "Upload to S3": {
             "Type": "Task",
             "Resource": "${UploaderFunctionArn}",
+            "Parameters": {
+              "keyNamePrefix": "articles/main/",
+              "imageUrl.$": "$.image"
+            },
+            "ResultPath": "$.image",
             "End": true
           }
         }
