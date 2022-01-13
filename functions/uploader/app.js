@@ -3,6 +3,7 @@ const got = require('got');
 const sharp = require('sharp');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { getPlaiceholder } = require('plaiceholder');
+const { generateColorPalette, getDominantColors } = require('./utils.js');
 
 const getImage = async (url) => {
   return got(url, { responseType: 'buffer' })
@@ -77,12 +78,18 @@ exports.uploader = async (event, context) => {
           return null;
         })
 
-      return Promise.all([uploadPromise, placeholderPromise]);
+      const palettePromise = generateColorPalette(buffer)
+        .then((palette) => palette)
+
+      return Promise.all([uploadPromise, placeholderPromise, palettePromise]);
     })
-    .then(values => {
+    .then(([s3ImageKey, placeholder, palette]) => {
       return {
-        s3ImageKey: values[0],
-        imagePlaceholder: values[1],
+        url: imageUrl,
+        s3ImageKey,
+        placeholder,
+        palette,
+        ...getDominantColors(palette),
       }
     })
     .catch(err => {
