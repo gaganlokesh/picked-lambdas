@@ -12,7 +12,7 @@ Resources:
       DefinitionUri: statemachine/content_processor.asl.json
       DefinitionSubstitutions:
         WebhookFunctionArn: !GetAtt WebhookFunction.Arn
-        ScraperFunctionArn: !GetAtt ScraperFunction.Arn
+        ArticleScraperFunctionArn: !GetAtt ArticleScraperFunction.Arn
         ImageHandlerFunctionArn: !GetAtt ImageHandlerFunction.Arn
         NotifierFunctionArn: !GetAtt NotifierFunction.Arn
       Events:
@@ -25,7 +25,7 @@ Resources:
         - LambdaInvokePolicy:
             FunctionName: !Ref WebhookFunction
         - LambdaInvokePolicy:
-            FunctionName: !Ref ScraperFunction
+            FunctionName: !Ref ArticleScraperFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref ImageHandlerFunction
         - LambdaInvokePolicy:
@@ -41,10 +41,10 @@ Resources:
         Variables:
           WEBHOOK_SECRET: !Ref WebhookSecret
 
-  ScraperFunction:
+  ArticleScraperFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/scraper/
+      CodeUri: functions/article-scraper/
       Handler: app.scraper
       Layers:
         - !Ref ScraperDepsLayer

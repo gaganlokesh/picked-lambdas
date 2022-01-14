@@ -26,7 +26,7 @@
         "States": {
           "Scrape Metadata": {
             "Type": "Task",
-            "Resource": "${ScraperFunctionArn}",
+            "Resource": "${ArticleScraperFunctionArn}",
             "Next": "Process Image"
           },
           "Process Image": {
