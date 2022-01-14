@@ -90,10 +90,6 @@ Resources:
     Metadata:
       BuildMethod: nodejs14.x
 
-  ImageBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref ImageBucketName
 
 Parameters:
   WebhookSecret:
