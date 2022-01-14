@@ -6,10 +6,10 @@ Description: >
   SAM Template for picked-lambdas
 
 Resources:
-  ContentProcessorStateMachine:
+  FeedContentProcessorStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
-      DefinitionUri: statemachine/content_processor.asl.json
+      DefinitionUri: statemachine/feed-content-processor.asl.json
       DefinitionSubstitutions:
         WebhookFunctionArn: !GetAtt WebhookFunction.Arn
         ArticleScraperFunctionArn: !GetAtt ArticleScraperFunction.Arn
@@ -110,9 +110,9 @@ Parameters:
     Type: String
 
 Outputs:
-  ContentProcessorStateMachineArn:
-    Description: "Content Processing state machine ARN"
-    Value: !Ref ContentProcessorStateMachine
-  ContentProcessorStateMachineRole:
-    Description: "IAM Role created for Content Processing state machine based on the specified SAM Policy Templates"
-    Value: !GetAtt ContentProcessorStateMachineRole.Arn
+  FeedContentProcessorStateMachineArn:
+    Description: "Feed Content Processing state machine ARN"
+    Value: !Ref FeedContentProcessorStateMachine
+  FeedContentProcessorStateMachineRole:
+    Description: "IAM Role created for Feed Content Processing state machine based on the specified SAM Policy Templates"
+    Value: !GetAtt FeedContentProcessorStateMachineRole.Arn
