@@ -13,7 +13,7 @@ Resources:
       DefinitionSubstitutions:
         WebhookFunctionArn: !GetAtt WebhookFunction.Arn
         ScraperFunctionArn: !GetAtt ScraperFunction.Arn
-        UploaderFunctionArn: !GetAtt UploaderFunction.Arn
+        ImageHandlerFunctionArn: !GetAtt ImageHandlerFunction.Arn
         NotifierFunctionArn: !GetAtt NotifierFunction.Arn
       Events:
         ApiGatewayTrigger:
@@ -27,7 +27,7 @@ Resources:
         - LambdaInvokePolicy:
             FunctionName: !Ref ScraperFunction
         - LambdaInvokePolicy:
-            FunctionName: !Ref UploaderFunction
+            FunctionName: !Ref ImageHandlerFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref NotifierFunction
 
@@ -52,20 +52,20 @@ Resources:
       Timeout: 50
       MemorySize: 1024
 
-  UploaderFunction:
+  ImageHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/uploader/
-      Handler: app.uploader
+      CodeUri: functions/image-handler/
+      Handler: app.imageHandler
       Runtime: nodejs14.x
       Timeout: 60
       Policies:
         - S3CrudPolicy:
-            BucketName: !Sub "${ImageBucket}"
+            BucketName: !Sub "${ImageBucketName}"
       Environment:
         Variables:
-          IMAGE_BUCKET: !Ref ImageBucket
-          BUCKET_REGION: !Ref BucketRegion
+          BUCKET_NAME: !Ref ImageBucketName
+          BUCKET_REGION: !Ref ImageBucketRegion
 
   NotifierFunction:
     Type: AWS::Serverless::Function
@@ -90,18 +90,18 @@ Resources:
     Metadata:
       BuildMethod: nodejs14.x
 
-  UploaderBucket:
+  ImageBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref ImageBucket
+      BucketName: !Ref ImageBucketName
 
 Parameters:
   WebhookSecret:
     Type: String
-  ImageBucket:
+  ImageBucketName:
     Type: String
     Default: "picked-dev"
-  BucketRegion:
+  ImageBucketRegion:
     Type: String
     Default: "ap-south-1"
   CallbackUrl:

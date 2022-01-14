@@ -27,11 +27,11 @@
           "Scrape Metadata": {
             "Type": "Task",
             "Resource": "${ScraperFunctionArn}",
-            "Next": "Upload to S3"
+            "Next": "Process Image"
           },
-          "Upload to S3": {
+          "Process Image": {
             "Type": "Task",
-            "Resource": "${UploaderFunctionArn}",
+            "Resource": "${ImageHandlerFunctionArn}",
             "Parameters": {
               "keyNamePrefix": "articles/main/",
               "imageUrl.$": "$.image"

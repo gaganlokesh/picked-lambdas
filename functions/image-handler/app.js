@@ -24,7 +24,7 @@ const hashImage = (buffer) => {
 const uploadImage = async (buffer, metadata, keyNamePrefix="") => {
   const key = `${keyNamePrefix}${hashImage(buffer)}.${metadata.format}`;
   let objectParams = {
-    Bucket: process.env.IMAGE_BUCKET,
+    Bucket: process.env.BUCKET_NAME,
     Key: key,
     ACL: 'public-read',
     Body: buffer,
@@ -52,7 +52,7 @@ const uploadImage = async (buffer, metadata, keyNamePrefix="") => {
  * @returns {Object} object - Object containing feed item along with uploaded links
  *
  */
-exports.uploader = async (event, context) => {
+exports.imageHandler = async (event, context) => {
   const { imageUrl, keyNamePrefix } = event;
   if (!imageUrl) {
     console.warn("No image URL provided");

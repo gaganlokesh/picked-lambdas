@@ -1,5 +1,6 @@
 {
-  "name": "picked-uploader",
+  "name": "image-handler",
+  "description": "Lambda for storing, processing and extracting data from images",
   "version": "1.0.0",
   "private": true,
   "main": "app.js",
