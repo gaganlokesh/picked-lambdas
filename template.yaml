@@ -5,11 +5,29 @@ Description: >
 
   SAM Template for picked-lambdas
 
+Parameters:
+  WebhookSecret:
+    Type: String
+  ImageBucketName:
+    Type: String
+    Default: "picked-dev"
+  ImageBucketRegion:
+    Type: String
+    Default: "ap-south-1"
+  CallbackUrl:
+    Type: String
+  CallbackSecret:
+    Type: String
+
 Resources:
+#############################################################################
+#  STEP FUNCTIONS                                                           #
+#############################################################################
   FeedContentProcessorStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri: statemachine/feed-content-processor.asl.json
+      Type: EXPRESS
       DefinitionSubstitutions:
         WebhookFunctionArn: !GetAtt WebhookFunction.Arn
         ArticleScraperFunctionArn: !GetAtt ArticleScraperFunction.Arn
@@ -21,16 +39,17 @@ Resources:
           Properties:
             Method: post
             Path: /{sourceId}
-      Policies:
-        - LambdaInvokePolicy:
-            FunctionName: !Ref WebhookFunction
-        - LambdaInvokePolicy:
-            FunctionName: !Ref ArticleScraperFunction
-        - LambdaInvokePolicy:
-            FunctionName: !Ref ImageHandlerFunction
-        - LambdaInvokePolicy:
-            FunctionName: !Ref NotifierFunction
+      Role: !GetAtt FeedContentProcessorStateMachineRole.Arn
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt FeedContentProcessorStateMachineLogGroup.Arn
+        IncludeExecutionData: false
+        Level: "ALL"
 
+#############################################################################
+#  LAMBDA FUNCTIONS                                                         #
+#############################################################################
   WebhookFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -79,6 +98,9 @@ Resources:
           CALLBACK_URL: !Ref CallbackUrl
           CALLBACK_SECRET: !Ref CallbackSecret
 
+#############################################################################
+#  LAMBDA LAYERS                                                            #
+#############################################################################
   ScraperDepsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -90,21 +112,56 @@ Resources:
     Metadata:
       BuildMethod: nodejs14.x
 
+#############################################################################
+#  IAM ROLES                                                                #
+#############################################################################
+  FeedContentProcessorStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                Fn::Sub: states.${AWS::Region}.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:*"
+                Resource: "*"
+                Sid: Logs
+          PolicyName: Logging
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource:
+                  - !GetAtt WebhookFunction.Arn
+                  - !GetAtt ArticleScraperFunction.Arn
+                  - !GetAtt ImageHandlerFunction.Arn
+                  - !GetAtt NotifierFunction.Arn
+          PolicyName: LambdaInvoke
 
-Parameters:
-  WebhookSecret:
-    Type: String
-  ImageBucketName:
-    Type: String
-    Default: "picked-dev"
-  ImageBucketRegion:
-    Type: String
-    Default: "ap-south-1"
-  CallbackUrl:
-    Type: String
-  CallbackSecret:
-    Type: String
+#############################################################################
+#  LOG GROUPS                                                               #
+#############################################################################
+  FeedContentProcessorStateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-FeedContentProcessorStateMachine"
+      RetentionInDays: 30
 
+#############################################################################
+#  OUTPUTS                                                                  #
+#############################################################################
 Outputs:
   FeedContentProcessorStateMachineArn:
     Description: "Feed Content Processing state machine ARN"
