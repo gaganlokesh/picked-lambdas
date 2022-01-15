@@ -1,0 +1,39 @@
+openapi: "3.0.1"
+info:
+  title:
+    Fn::Sub: "${AWS::StackName}-api"
+  version: "1.0.0"
+
+paths:
+  /{sourceId}:
+    post:
+      responses:
+        "400":
+          description: "400 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content: {}
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        type: "aws"
+        credentials:
+          Fn::GetAtt:
+            - ApiGatewayRole
+            - Arn
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:states:action/StartExecution"
+        responses:
+          "200":
+            statusCode: "200"
+          "400":
+            statusCode: "400"
+        requestTemplates:
+          application/json:
+            Fn::Sub: |-
+              {
+                "input": "{\"body\": $util.escapeJavaScript($input.json('$')).replaceAll("\\'", "'"), \"params\": {\"sourceId\":\"$input.params('sourceId')\"}, \"headers\": {\"content-type\": \"$input.params().header.get('content-type')\", \"x-hub-signature\": \"$input.params().header.get('x-hub-signature')\"}}",
+                "name": "$context.requestId",
+                "stateMachineArn": "${FeedContentProcessorStateMachine.Arn}"
+              }
+        passthroughBehavior: "when_no_match"

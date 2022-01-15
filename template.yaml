@@ -21,6 +21,20 @@ Parameters:
 
 Resources:
 #############################################################################
+#  API GATEWAY                                                               #
+#############################################################################
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "${AWS::StackName}-api"
+      StageName: "Prod"
+      DefinitionBody:
+        Fn::Transform:
+            Name: "AWS::Include"
+            Parameters:
+              Location: api.yaml
+
+#############################################################################
 #  STEP FUNCTIONS                                                           #
 #############################################################################
   FeedContentProcessorStateMachine:
@@ -39,6 +53,7 @@ Resources:
           Properties:
             Method: post
             Path: /{sourceId}
+            RestApiId: !Ref ApiGateway
       Role: !GetAtt FeedContentProcessorStateMachineRole.Arn
       Logging:
         Destinations:
@@ -115,6 +130,36 @@ Resources:
 #############################################################################
 #  IAM ROLES                                                                #
 #############################################################################
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                Fn::Sub: apigateway.${AWS::Region}.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:*"
+                Resource: "*"
+          PolicyName: Logging
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "states:StartExecution"
+                Resource: !Ref FeedContentProcessorStateMachine
+          PolicyName: StartExecution
+
   FeedContentProcessorStateMachineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -153,6 +198,12 @@ Resources:
 #############################################################################
 #  LOG GROUPS                                                               #
 #############################################################################
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-ApiGateway"
+      RetentionInDays: 30
+
   FeedContentProcessorStateMachineLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
