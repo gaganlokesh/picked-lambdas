@@ -1,0 +1,13 @@
+{
+  "name": "site-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scrape metadata from websites",
+  "main": "app.js",
+  "dependencies": {
+    "@metascraper/helpers": "^5.25.7",
+    "metascraper": "^5.25.7",
+    "metascraper-logo-favicon": "^5.25.7"
+  },
+  "scripts": {}
+}

@@ -106,6 +106,17 @@ Resources:
           CALLBACK_URL: !Ref CallbackUrl
           CALLBACK_SECRET: !Ref CallbackSecret
 
+  SiteScraperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/site-scraper/
+      Handler: app.siteScraper
+      Layers:
+        - !Ref ScraperDepsLayer
+      Runtime: nodejs14.x
+      Timeout: 60
+      MemorySize: 740
+
 #############################################################################
 #  LAMBDA LAYERS                                                            #
 #############################################################################
