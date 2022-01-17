@@ -55,6 +55,22 @@ Resources:
         IncludeExecutionData: false
         Level: "ALL"
 
+  SiteScraperStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/site-scraper.asl.json
+      Type: EXPRESS
+      DefinitionSubstitutions:
+        SiteScraperFunctionArn: !GetAtt SiteScraperFunction.Arn
+        ImageHandlerFunctionArn: !GetAtt ImageHandlerFunction.Arn
+      Role: !GetAtt SiteScraperStateMachineRole.Arn
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt SiteScraperStateMachineLogGroup.Arn
+        IncludeExecutionData: false
+        Level: "ALL"
+
 #############################################################################
 #  LAMBDA FUNCTIONS                                                         #
 #############################################################################
@@ -199,6 +215,39 @@ Resources:
                   - !GetAtt NotifierFunction.Arn
           PolicyName: LambdaInvoke
 
+  SiteScraperStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                Fn::Sub: states.${AWS::Region}.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:*"
+                Resource: "*"
+                Sid: Logs
+          PolicyName: Logging
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource:
+                  - !GetAtt SiteScraperFunction.Arn
+                  - !GetAtt ImageHandlerFunction.Arn
+          PolicyName: LambdaInvoke
+
 #############################################################################
 #  LOG GROUPS                                                               #
 #############################################################################
@@ -214,6 +263,12 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-FeedContentProcessorStateMachine"
       RetentionInDays: 30
 
+  SiteScraperStateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-SiteScraperStateMachine"
+      RetentionInDays: 7
+
 #############################################################################
 #  OUTPUTS                                                                  #
 #############################################################################
@@ -224,3 +279,9 @@ Outputs:
   FeedContentProcessorStateMachineRole:
     Description: "IAM Role created for Feed Content Processing state machine based on the specified SAM Policy Templates"
     Value: !GetAtt FeedContentProcessorStateMachineRole.Arn
+  SiteScraperStateMachineArn:
+    Description: "Site scraper state machine ARN"
+    Value: !Ref SiteScraperStateMachine
+  SiteScraperStateMachineRole:
+    Description: "IAM Role created for site scraper state machine based on the specified SAM Policy Templates"
+    Value: !GetAtt SiteScraperStateMachineRole.Arn

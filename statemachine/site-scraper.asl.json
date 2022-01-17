@@ -1,0 +1,36 @@
+{
+  "Comment": "A state machine to scrape data from any website",
+  "StartAt": "Scrape Webpage",
+  "States": {
+    "Scrape Webpage": {
+      "Type": "Task",
+      "Resource": "${SiteScraperFunctionArn}",
+      "Next": "Should Process Logo?"
+    },
+    "Should Process Logo?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.logo",
+          "IsPresent": true,
+          "Next": "Process Logo"
+        }
+      ],
+      "Default": "Stop Execution"
+    },
+    "Process Logo": {
+      "Type": "Task",
+      "Resource": "${ImageHandlerFunctionArn}",
+      "Parameters": {
+        "keyNamePrefix": "sources/logo/",
+        "imageUrl.$": "$.logo"
+      },
+      "ResultPath": "$.logo",
+      "End": true
+    },
+    "Stop Execution": {
+      "Type": "Pass",
+      "End": true
+    }
+  }
+}
