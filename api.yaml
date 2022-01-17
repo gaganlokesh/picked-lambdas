@@ -37,3 +37,55 @@ paths:
                 "stateMachineArn": "${FeedContentProcessorStateMachine.Arn}"
               }
         passthroughBehavior: "when_no_match"
+
+  /scrape:
+    get:
+      responses:
+        "400":
+          description: "400 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content: {}
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        integrationSubtype: "StepFunctions-StartSyncExecution"
+        type: "aws"
+        credentials:
+          Fn::GetAtt:
+            - ApiGatewayRole
+            - Arn
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:states:action/StartSyncExecution"
+        responses:
+          "200":
+            statusCode: "200"
+            responseTemplates:
+              application/json:
+                Fn::Sub: |-
+                  #set ($body = $util.parseJson($input.body))
+
+                  #if ($body.status == "SUCCEEDED")
+                    $body.output
+                  #elseif ($body.status == "FAILED")
+                    #set($context.responseOverride.status = 500)
+                    {
+                      "cause": "$body.cause",
+                      "error": "$body.error"
+                    }
+                  #else
+                    #set($context.responseOverride.status = 500)
+                    $input.body
+                  #end
+          "400":
+            statusCode: "400"
+          "500":
+            statusCode: "500"
+        requestTemplates:
+          application/json:
+            Fn::Sub: |-
+              {
+                "input": "{\"url\": \"$input.params('url')\"}",
+                "name": "$context.requestId",
+                "stateMachineArn": "${SiteScraperStateMachine.Arn}"
+              }

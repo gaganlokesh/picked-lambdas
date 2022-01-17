@@ -179,6 +179,14 @@ Resources:
                   - "states:StartExecution"
                 Resource: !Ref FeedContentProcessorStateMachine
           PolicyName: StartExecution
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "states:StartSyncExecution"
+                Resource: !Ref SiteScraperStateMachine
+          PolicyName: StartSyncExecution
 
   FeedContentProcessorStateMachineRole:
     Type: AWS::IAM::Role
