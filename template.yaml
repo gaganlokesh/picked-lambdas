@@ -47,13 +47,6 @@ Resources:
         ArticleScraperFunctionArn: !GetAtt ArticleScraperFunction.Arn
         ImageHandlerFunctionArn: !GetAtt ImageHandlerFunction.Arn
         NotifierFunctionArn: !GetAtt NotifierFunction.Arn
-      Events:
-        ApiGatewayTrigger:
-          Type: Api
-          Properties:
-            Method: post
-            Path: /{sourceId}
-            RestApiId: !Ref ApiGateway
       Role: !GetAtt FeedContentProcessorStateMachineRole.Arn
       Logging:
         Destinations:
