@@ -93,7 +93,7 @@ Resources:
         - !Ref ScraperDepsLayer
       Runtime: nodejs14.x
       Timeout: 50
-      MemorySize: 1024
+      MemorySize: 740
 
   ImageHandlerFunction:
     Type: AWS::Serverless::Function
@@ -102,6 +102,7 @@ Resources:
       Handler: app.imageHandler
       Runtime: nodejs14.x
       Timeout: 60
+      MemorySize: 180
       Policies:
         - S3CrudPolicy:
             BucketName: !Sub "${ImageBucketName}"
