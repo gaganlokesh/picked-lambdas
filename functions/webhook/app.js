@@ -25,7 +25,7 @@ const buildFeedItems = (items) => {
 /**
  * Lambda function to process webhook requests from feeder.
  * This function parses the request body and creates a list of feed items.
- * 
+ *
  * @param {Object} event - Input event to the Lambda function
  * @param {Object} context - Lambda Context runtime methods and attributes
  */
@@ -44,7 +44,7 @@ exports.webhook = async (event, context) => {
     throw new UnrecognizedRequestError("Failed to verify hub signature");
   }
 
-  if (body.status?.code !== 200 || body.items?.length === 0) {
+  if (!body.items || body.items?.length === 0) {
     // Stop execution
     console.warn("No feed items to process");
     throw new UnrecognizedRequestError("No feed items to process");
