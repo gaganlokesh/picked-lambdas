@@ -1,35 +1,24 @@
-const Vibrant = require('node-vibrant');
 const colorableDominant = require('colorable-dominant');
+const getColors = require('get-image-colors');
+const sharp = require('sharp');
 
-const toHexPalette = async (palette) => {
-  return Object.keys(palette)
-    .reduce((acc, key) => {
-      const value = palette[key]
-      if (value) {
-        acc.push({
-          popularity: value?.population,
-          hex: value?.hex
-        })
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => a.popularity <= b.popularity)
-    .map(color => color.hex?.toUpperCase())
+const optimizeImage = (buffer) => {
+  return sharp(buffer)
+    .resize(200, 200, { fit: 'inside', withoutEnlargement: true })
+    .ensureAlpha()
+    .toBuffer({ resolveWithObject: true })
   ;
 }
 
+const toHexPalette = (colors) => colors.map(color => color.hex());
+
 const generateColorPalette = async (buffer) => {
-  const vibrant = Vibrant.from(buffer);
-  let palette = [];
+  const { data, info } = await optimizeImage(buffer)
+  const format = 'image/' + info?.format;
 
-  try {
-    const vibrantPalette = await vibrant.getPalette();
-    palette = toHexPalette(vibrantPalette);
-  } catch (error) {
-    console.warn(error);
-  }
+  let colors = await getColors(data, format)
 
-  return palette;
+  return toHexPalette(colors);
 }
 
 const getDominantColors = palette => colorableDominant(palette);
