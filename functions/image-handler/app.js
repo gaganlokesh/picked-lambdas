@@ -1,9 +1,9 @@
-const crypto = require('crypto');
-const got = require('got');
-const sharp = require('sharp');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { getPlaiceholder } = require('plaiceholder');
-const { generateColorPalette, getDominantColors } = require('./utils.js');
+import crypto from 'crypto';
+import got from 'got';
+import sharp from 'sharp';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getPlaiceholder } from 'plaiceholder';
+import { generateColorPalette, getDominantColors } from './utils.js';
 
 const getImage = async (url) => {
   return got(url, { responseType: 'buffer' })
@@ -52,7 +52,7 @@ const uploadImage = async (buffer, metadata, keyNamePrefix="") => {
  * @returns {Object} object - Object containing feed item along with uploaded links
  *
  */
-exports.imageHandler = async (event, context) => {
+export async function imageHandler (event, context) {
   const { imageUrl, keyNamePrefix } = event;
   if (!imageUrl) {
     console.warn("No image URL provided");

@@ -3,6 +3,7 @@
   "description": "Lambda for storing, processing and extracting data from images",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "main": "app.js",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.11.0",

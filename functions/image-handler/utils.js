@@ -1,6 +1,6 @@
-const colorableDominant = require('colorable-dominant');
-const getColors = require('get-image-colors');
-const sharp = require('sharp');
+import colorableDominant from 'colorable-dominant';
+import getColors from 'get-image-colors';
+import sharp from 'sharp';
 
 const optimizeImage = (buffer) => {
   return sharp(buffer)
@@ -23,7 +23,4 @@ const generateColorPalette = async (buffer) => {
 
 const getDominantColors = palette => colorableDominant(palette);
 
-module.exports = {
-  generateColorPalette,
-  getDominantColors,
-};
+export { generateColorPalette, getDominantColors };
