@@ -2,8 +2,8 @@ const createBrowserless = require('browserless');
 const chromium = require('chrome-aws-lambda');
 const metascraper = require('metascraper')([
   require('metascraper-author')(),
-  require('metascraper-image')(),
   require('metascraper-lang')(),
+  require('./rules/image.js')(),
   require('./rules/author-twitter.js')(),
   require('./rules/canonical-url.js')(),
   require('./rules/metered-content.js')(),

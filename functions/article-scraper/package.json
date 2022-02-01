@@ -9,7 +9,6 @@
     "jsdom": "^16.5.2",
     "metascraper": "^5.21.4",
     "metascraper-author": "^5.21.4",
-    "metascraper-image": "^5.21.4",
     "metascraper-lang": "^5.21.4",
     "reading-time": "^1.3.0"
   },
