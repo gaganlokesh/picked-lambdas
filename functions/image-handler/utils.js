@@ -1,5 +1,7 @@
 import colorableDominant from 'colorable-dominant';
+import decodeIco from 'decode-ico';
 import getColors from 'get-image-colors';
+import lodepng from 'lodepng';
 import sharp from 'sharp';
 
 const optimizeImage = (buffer) => {
@@ -23,4 +25,16 @@ const generateColorPalette = async (buffer) => {
 
 const getDominantColors = palette => colorableDominant(palette);
 
-export { generateColorPalette, getDominantColors };
+const icoToPng = async (buffer) => {
+  const images = decodeIco(buffer);
+  // Pick the highest resolution image
+  const image = images.sort((a, b) => b.width - a.width)[0];
+
+  if (image.type === "png") {
+    return Buffer.from(image.data);
+  }
+
+  return lodepng.encode(image);
+}
+
+export { generateColorPalette, getDominantColors, icoToPng };

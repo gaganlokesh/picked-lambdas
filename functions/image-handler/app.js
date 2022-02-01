@@ -1,15 +1,16 @@
 import crypto from 'crypto';
 import got from 'got';
 import sharp from 'sharp';
+import { fileTypeFromBuffer } from 'file-type';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getPlaiceholder } from 'plaiceholder';
-import { generateColorPalette, getDominantColors } from './utils.js';
+import { generateColorPalette, getDominantColors, icoToPng } from './utils.js';
 
 const getImage = async (url) => {
   return got(url, { responseType: 'buffer' })
     .then(res => res.body)
     .catch(err => {
-      console.warn("Error downloading image:", err);
+      console.err("Error downloading image");
       throw err;
     })
   ;
@@ -39,10 +40,37 @@ const uploadImage = async (buffer, metadata, keyNamePrefix="") => {
       return key;
     })
     .catch(err => {
-      console.warn("Failed to upload image:", err);
+      console.error("Failed to upload image");
       throw err;
     })
   ;
+}
+
+const processImage = async (imageUrl, keyNamePrefix) => {
+  let buffer = await getImage(imageUrl);
+  const fileType = await fileTypeFromBuffer(buffer);
+
+  // Speacial handling for ICO format due to issues with sharp
+  if (fileType.ext === "ico") {
+    // Convert to PNG
+    buffer = await icoToPng(buffer);
+  }
+
+  const metadata = await sharp(buffer).metadata();
+
+  const uploadPromise = uploadImage(
+    buffer,
+    {
+      format: metadata?.format,
+      width: metadata?.width,
+      height: metadata?.height,
+    },
+    keyNamePrefix
+  );
+  const placeholderPromise = getPlaiceholder(buffer)
+  const palettePromise = generateColorPalette(buffer)
+
+  return Promise.all([uploadPromise, placeholderPromise, palettePromise]);
 }
 
 /**
@@ -59,44 +87,18 @@ export async function imageHandler (event, context) {
     return null;
   }
 
-  return getImage(imageUrl)
-    .then(buffer => {
-      const image = sharp(buffer);
+  try {
+    const [ s3ImageKey, placeholder, palette ] = await processImage(imageUrl, keyNamePrefix);
 
-      const uploadPromise = image.metadata().then(metadata => {
-        const meta = {
-          format: metadata.format,
-          width: metadata.width,
-          height: metadata.height,
-        }
-
-        return uploadImage(buffer, meta, keyNamePrefix);
-      })
-
-      const placeholderPromise = getPlaiceholder(buffer)
-        .then(({ base64 }) => (base64))
-        .catch(err => {
-          console.warn(err);
-          return null;
-        })
-
-      const palettePromise = generateColorPalette(buffer)
-        .then((palette) => palette)
-
-      return Promise.all([uploadPromise, placeholderPromise, palettePromise]);
-    })
-    .then(([s3ImageKey, placeholder, palette]) => {
-      return {
-        url: imageUrl,
-        s3ImageKey,
-        placeholder,
-        palette,
-        ...getDominantColors(palette),
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      return null;
-    })
-  ;
+    return {
+      url: imageUrl,
+      placeholder: placeholder?.base64,
+      s3ImageKey,
+      palette,
+      ...getDominantColors(palette),
+    }
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 };
