@@ -13,6 +13,19 @@ const { Readability, isProbablyReaderable } = require('@mozilla/readability');
 const { JSDOM } = require('jsdom');
 const readingTime = require('reading-time');
 
+const getAuthor = ({ author, authorTwitter }) => {
+  if (author && authorTwitter) {
+    return {
+      name: author,
+      twitter: { ...authorTwitter },
+    }
+  }
+
+  if (author) return { name: author };
+
+  return null;
+}
+
 const getReadabilityMeta = (htmlString, url) => {
   const { document } = (new JSDOM(htmlString, { url })).window;
 
@@ -77,15 +90,19 @@ const scrapeMetadata = async ({ url, content }) => {
  * @param {Object} event - Input event to the Lambda function
  * @param {Object} context - Lambda Context runtime methods and attributes
  *
- * @returns {Object} object - Enriched feed item with metadata
+ * @returns {Object} object - Enriched feed item
  *
  */
 exports.scraper = async (event, context) => {
   const metadata = await scrapeMetadata(event);
 
-  return {
+  let response = {
     ...event,
     ...metadata,
+    author: getAuthor(metadata),
     tags: event.tags?.length > 0 ? event.tags : (metadata?.tags || []),
   }
+  delete response.authorTwitter;
+
+  return response;
 };

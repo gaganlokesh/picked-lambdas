@@ -18,6 +18,8 @@ Parameters:
     Type: String
   CallbackSecret:
     Type: String
+  TwitterBearerToken:
+    Type: String
 
 Resources:
 #############################################################################
@@ -94,6 +96,9 @@ Resources:
       Runtime: nodejs14.x
       Timeout: 50
       MemorySize: 740
+      Environment:
+        Variables:
+          TWITTER_BEARER_TOKEN: !Ref TwitterBearerToken
 
   ImageHandlerFunction:
     Type: AWS::Serverless::Function
